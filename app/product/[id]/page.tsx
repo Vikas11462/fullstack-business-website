@@ -107,7 +107,11 @@ export default function ProductPage() {
                             <p className="text-muted-foreground">{product.description}</p>
 
                             <div className="flex items-center gap-4 pt-4">
-                                {quantity === 0 ? (
+                                {(product.stock !== undefined && product.stock <= 0) ? (
+                                    <Button size="lg" disabled className="bg-gray-300 text-gray-500">
+                                        Out of Stock
+                                    </Button>
+                                ) : quantity === 0 ? (
                                     <Button size="lg" onClick={() => addItem(product)}>
                                         Add to Cart
                                     </Button>
@@ -126,11 +130,17 @@ export default function ProductPage() {
                                                 size="icon"
                                                 variant="ghost"
                                                 onClick={() => addItem(product)}
+                                                disabled={product.stock !== undefined && quantity >= product.stock}
                                             >
                                                 <Plus className="h-4 w-4" />
                                             </Button>
                                         </div>
-                                        <span className="text-sm text-muted-foreground">in cart</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm text-muted-foreground">in cart</span>
+                                            {product.stock !== undefined && product.stock < 10 && (
+                                                <span className="text-xs text-red-500">Only {product.stock} left!</span>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>

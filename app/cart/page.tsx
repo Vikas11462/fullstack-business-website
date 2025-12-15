@@ -34,6 +34,11 @@ export default function CartPage() {
                                             <h3 className="font-semibold">{item.name}</h3>
                                             <p className="text-sm text-muted-foreground">{item.category}</p>
                                             <div className="mt-1 font-bold">₹{item.price}</div>
+                                            {item.stock !== undefined && item.stock < 10 && (
+                                                <p className="text-xs text-red-500 font-medium mt-1">
+                                                    Only {item.stock} left in stock!
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Button
@@ -50,6 +55,7 @@ export default function CartPage() {
                                                 variant="outline"
                                                 className="h-8 w-8 hover:bg-primary/10 hover:text-primary active:scale-90 transition-all duration-200"
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                disabled={item.stock !== undefined && item.quantity >= item.stock}
                                             >
                                                 <Plus className="h-3 w-3" />
                                             </Button>

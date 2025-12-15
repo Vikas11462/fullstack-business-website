@@ -8,6 +8,7 @@ export interface Product {
     categories?: { name: string } // Joined data
     image: string
     popular: boolean
+    stock?: number
 }
 
 export interface Category {
