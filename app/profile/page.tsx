@@ -5,7 +5,7 @@ import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Link from 'next/link';
+
 import { ArrowLeft, Package, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { products as staticProducts } from '@/lib/data'; // Fallback
 
