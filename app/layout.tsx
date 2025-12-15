@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { CartProvider } from "@/context/cart-context";
 import { AuthProvider } from "@/context/auth-context";
 import SmoothScroll from "@/components/smooth-scroll";
-import CustomCursor from "@/components/custom-cursor";
+
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -25,7 +25,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <SmoothScroll />
-            <CustomCursor />
+
             {children}
           </CartProvider>
         </AuthProvider>
