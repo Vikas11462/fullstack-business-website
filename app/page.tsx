@@ -33,7 +33,7 @@ export default function Home() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, categories(name)')
         .eq('popular', true)
         .limit(4)
 

@@ -39,16 +39,16 @@ export default function CartPage() {
                                             <Button
                                                 size="icon"
                                                 variant="outline"
-                                                className="h-8 w-8"
+                                                className="h-8 w-8 hover:bg-primary/10 hover:text-primary active:scale-90 transition-all duration-200"
                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                             >
                                                 <Minus className="h-3 w-3" />
                                             </Button>
-                                            <span className="w-8 text-center">{item.quantity}</span>
+                                            <span className="w-8 text-center font-medium">{item.quantity}</span>
                                             <Button
                                                 size="icon"
                                                 variant="outline"
-                                                className="h-8 w-8"
+                                                className="h-8 w-8 hover:bg-primary/10 hover:text-primary active:scale-90 transition-all duration-200"
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                             >
                                                 <Plus className="h-3 w-3" />
@@ -57,7 +57,7 @@ export default function CartPage() {
                                         <Button
                                             size="icon"
                                             variant="ghost"
-                                            className="text-destructive hover:text-destructive"
+                                            className="text-destructive hover:text-destructive hover:bg-destructive/10 hover:shadow-sm active:scale-90 transition-all duration-200"
                                             onClick={() => removeItem(item.id)}
                                         >
                                             <Trash2 className="h-5 w-5" />
@@ -83,7 +83,7 @@ export default function CartPage() {
                                         <span>₹{totalPrice}</span>
                                     </div>
                                 </div>
-                                <Button className="mt-6 w-full" size="lg" asChild>
+                                <Button className="mt-6 w-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200" size="lg" asChild>
                                     <Link href="/checkout">Proceed to Checkout</Link>
                                 </Button>
                             </div>

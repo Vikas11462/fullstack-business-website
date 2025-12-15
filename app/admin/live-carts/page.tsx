@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ShoppingCart, RefreshCw } from 'lucide-react';
-import { products } from '@/lib/data';
 
 type CartItem = {
     id: string;
@@ -38,8 +37,9 @@ export default function LiveCartsPage() {
 
             if (cartError) throw cartError;
 
-            // 2. Get unique user IDs
+            // 2. Get unique user IDs and Product IDs
             const userIds = Array.from(new Set(cartItems?.map((item: any) => item.user_id) || [])) as string[];
+            const productIds = Array.from(new Set(cartItems?.map((item: any) => item.product_id) || [])) as string[];
 
             // 3. Fetch profiles for these users
             let profilesMap: Record<string, any> = {};
@@ -56,7 +56,22 @@ export default function LiveCartsPage() {
                 });
             }
 
-            // 4. Group items by user
+            // 4. Fetch products details from DB
+            let productsMap: Record<string, any> = {};
+            if (productIds.length > 0) {
+                const { data: productsData, error: productsError } = await supabase
+                    .from('products')
+                    .select('id, name, price, image')
+                    .in('id', productIds);
+
+                if (productsError) throw productsError;
+
+                productsData?.forEach(p => {
+                    productsMap[p.id] = p;
+                });
+            }
+
+            // 5. Group items by user
             const groupedCarts: Record<string, UserCart> = {};
 
             cartItems?.forEach((item: any) => {
@@ -73,8 +88,8 @@ export default function LiveCartsPage() {
                     };
                 }
 
-                // Find product details from local data
-                const product = products.find(p => p.id === item.product_id);
+                // Find product details from DB map
+                const product = productsMap[item.product_id];
                 const productName = product?.name || 'Unknown Product';
                 const productPrice = product?.price || 0;
                 const productImages = product?.image ? [product.image] : [];

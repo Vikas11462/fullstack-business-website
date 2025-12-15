@@ -3,7 +3,9 @@ export interface Product {
     name: string
     description: string
     price: number
-    category: string
+    category?: string // Legacy / Seed data
+    category_id?: string // Supabase Foreign Key
+    categories?: { name: string } // Joined data
     image: string
     popular: boolean
 }

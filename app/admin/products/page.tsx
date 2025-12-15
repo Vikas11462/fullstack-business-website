@@ -14,7 +14,10 @@ type Product = {
     price_2?: number;
     price_3?: number;
     stock: number;
-    category: string;
+    category_id: string | null;
+    categories?: {
+        name: string;
+    };
     image: string;
     popular: boolean;
 };
@@ -34,7 +37,8 @@ export default function AdminProductsPage() {
         price_2: 0,
         price_3: 0,
         stock: 0,
-        category: '',
+
+        category_id: '',
         image: '/placeholder.svg',
         popular: false
     });
@@ -45,7 +49,7 @@ export default function AdminProductsPage() {
     const [uploadingImage, setUploadingImage] = useState(false);
 
     // Categories state
-    const [categories, setCategories] = useState<string[]>([]);
+    const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
     const [newCategory, setNewCategory] = useState('');
     const [isAddingCategory, setIsAddingCategory] = useState(false);
 
@@ -58,7 +62,7 @@ export default function AdminProductsPage() {
         try {
             const { data, error } = await supabase
                 .from('categories')
-                .select('name')
+                .select('id, name')
                 .order('name');
 
             if (error) {
@@ -68,7 +72,7 @@ export default function AdminProductsPage() {
             }
 
             if (data && data.length > 0) {
-                setCategories(data.map(c => c.name));
+                setCategories(data);
             }
         } catch (err) {
             console.error('Error fetching categories:', err);
@@ -80,15 +84,15 @@ export default function AdminProductsPage() {
 
         try {
             const categoryName = newCategory.trim();
-            // Optimistic update
-            if (!categories.includes(categoryName)) {
-                setCategories(prev => [...prev, categoryName].sort());
-            }
+            // We can't really do optimistic updates easily with IDs unless we generate a fake one, 
+            // but let's just wait for DB return for simplicity and correctness.
 
             // Try to save to DB
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('categories')
-                .insert([{ name: categoryName }]);
+                .insert([{ name: categoryName }])
+                .select()
+                .single();
 
             if (error) {
                 console.error('Error saving category to DB:', error.message);
@@ -99,10 +103,19 @@ export default function AdminProductsPage() {
             }
 
             // Select the new category
-            if (isAddingProduct) {
-                setNewProduct(prev => ({ ...prev, category: categoryName }));
-            } else if (editingProduct) {
-                setEditingProduct(prev => ({ ...editingProduct, category: categoryName }));
+            if (data) {
+                // Update local state with real ID
+                setCategories(prev => {
+                    // Remove optimistic if name matches (though unlikely to collide perfectly in this simple logic, safety check)
+                    const filtered = prev.filter(c => c.name !== categoryName);
+                    return [...filtered, data].sort((a, b) => a.name.localeCompare(b.name));
+                });
+
+                if (isAddingProduct) {
+                    setNewProduct(prev => ({ ...prev, category_id: data.id }));
+                } else if (editingProduct) {
+                    setEditingProduct(prev => ({ ...editingProduct, category_id: data.id }));
+                }
             }
 
             setIsAddingCategory(false);
@@ -148,7 +161,7 @@ export default function AdminProductsPage() {
         try {
             const { data, error } = await supabase
                 .from('products')
-                .select('*')
+                .select('*, categories(name)')
                 .order('name');
 
             if (error) throw error;
@@ -171,10 +184,14 @@ export default function AdminProductsPage() {
                 name: p.name,
                 description: p.description,
                 price: p.price,
-                category: p.category,
+                // category: p.category, // OLD
                 image: p.image,
                 popular: p.popular,
-                stock: 100 // Default stock
+                stock: 100, // Default stock
+                // For seeding, we might need to find a category ID or create one. 
+                // This is complex. Let's assume we map by name if possible or skip.
+                // ideally we fetch categories first.
+                category_id: categories.find(c => c.name === p.category)?.id || null
             }));
 
             const { error } = await supabase
@@ -215,9 +232,17 @@ export default function AdminProductsPage() {
 
     const handleAddProduct = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Find category name for legacy support
+        const selectedCategory = categories.find(c => c.id === newProduct.category_id);
+        const productPayload = {
+            ...newProduct,
+            category: selectedCategory?.name || 'Uncategorized' // Fallback to satisfy NOT NULL
+        };
+
         const { error } = await supabase
             .from('products')
-            .insert([newProduct]);
+            .insert([productPayload]);
 
         if (error) {
             alert('Error adding product: ' + error.message);
@@ -230,7 +255,7 @@ export default function AdminProductsPage() {
                 price_2: 0,
                 price_3: 0,
                 stock: 0,
-                category: '',
+                category_id: '',
                 image: '/placeholder.svg',
                 popular: false
             });
@@ -242,6 +267,9 @@ export default function AdminProductsPage() {
         e.preventDefault();
         if (!editingProduct) return;
 
+        // Find category name for legacy support
+        const selectedCategory = categories.find(c => c.id === editingProduct.category_id);
+
         const { error } = await supabase
             .from('products')
             .update({
@@ -251,7 +279,8 @@ export default function AdminProductsPage() {
                 price_2: editingProduct.price_2,
                 price_3: editingProduct.price_3,
                 stock: editingProduct.stock,
-                category: editingProduct.category,
+                category_id: editingProduct.category_id,
+                category: selectedCategory?.name || 'Uncategorized', // Update legacy field too
                 popular: editingProduct.popular
             })
             .eq('id', editingProduct.id);
@@ -344,7 +373,7 @@ export default function AdminProductsPage() {
                                 <td className="px-6 py-3">{product.price_2 ? `₹${product.price_2}` : '-'}</td>
                                 <td className="px-6 py-3">{product.price_3 ? `₹${product.price_3}` : '-'}</td>
                                 <td className="px-6 py-3">{product.stock}</td>
-                                <td className="px-6 py-3">{product.category}</td>
+                                <td className="px-6 py-3">{product.categories?.name || 'Uncategorized'}</td>
                                 <td className="flex gap-2 px-6 py-3">
                                     <Button
                                         onClick={() => setEditingProduct(product)}
@@ -402,218 +431,218 @@ export default function AdminProductsPage() {
                         <form onSubmit={isAddingProduct ? handleAddProduct : handleUpdate} className="flex flex-1 flex-col overflow-hidden">
                             <div className="flex-1 overflow-y-auto p-6">
                                 <div className="grid gap-4 md:grid-cols-2">
-                                <div className="col-span-2">
-                                    <label className="mb-1 block text-sm font-medium">Name</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={isAddingProduct ? newProduct.name : editingProduct?.name}
-                                        onChange={(e) => isAddingProduct
-                                            ? setNewProduct({ ...newProduct, name: e.target.value })
-                                            : setEditingProduct({ ...editingProduct!, name: e.target.value })
-                                        }
-                                        className="w-full rounded-md border p-2"
-                                    />
-                                </div>
-                                <div className="col-span-2">
-                                    <label className="mb-1 block text-sm font-medium">Description</label>
-                                    <textarea
-                                        value={isAddingProduct ? newProduct.description : editingProduct?.description}
-                                        onChange={(e) => isAddingProduct
-                                            ? setNewProduct({ ...newProduct, description: e.target.value })
-                                            : setEditingProduct({ ...editingProduct!, description: e.target.value })
-                                        }
-                                        className="w-full rounded-md border p-2"
-                                        rows={3}
-                                    />
-                                </div>
-
-                                {/* Image Selection */}
-                                <div className="col-span-2 space-y-2">
-                                    <label className="block text-sm font-medium">Product Image</label>
-                                    <div className="flex gap-4 border-b pb-2">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            onClick={() => setImageMode('url')}
-                                            className={`text-sm font-medium ${imageMode === 'url' ? 'text-primary border-b-2 border-primary rounded-none' : 'text-gray-500 rounded-none'}`}
-                                        >
-                                            Image Link
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            onClick={() => setImageMode('upload')}
-                                            className={`text-sm font-medium ${imageMode === 'upload' ? 'text-primary border-b-2 border-primary rounded-none' : 'text-gray-500 rounded-none'}`}
-                                        >
-                                            Upload File
-                                        </Button>
-                                    </div>
-
-                                    {imageMode === 'url' ? (
+                                    <div className="col-span-2">
+                                        <label className="mb-1 block text-sm font-medium">Name</label>
                                         <input
                                             type="text"
-                                            placeholder="https://example.com/image.jpg"
-                                            value={(isAddingProduct ? newProduct.image : editingProduct?.image) || ''}
+                                            required
+                                            value={isAddingProduct ? newProduct.name : editingProduct?.name}
                                             onChange={(e) => isAddingProduct
-                                                ? setNewProduct({ ...newProduct, image: e.target.value })
-                                                : setEditingProduct({ ...editingProduct!, image: e.target.value })
+                                                ? setNewProduct({ ...newProduct, name: e.target.value })
+                                                : setEditingProduct({ ...editingProduct!, name: e.target.value })
                                             }
                                             className="w-full rounded-md border p-2"
                                         />
-                                    ) : (
-                                        <div className="flex items-center gap-2">
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="mb-1 block text-sm font-medium">Description</label>
+                                        <textarea
+                                            value={isAddingProduct ? newProduct.description : editingProduct?.description}
+                                            onChange={(e) => isAddingProduct
+                                                ? setNewProduct({ ...newProduct, description: e.target.value })
+                                                : setEditingProduct({ ...editingProduct!, description: e.target.value })
+                                            }
+                                            className="w-full rounded-md border p-2"
+                                            rows={3}
+                                        />
+                                    </div>
+
+                                    {/* Image Selection */}
+                                    <div className="col-span-2 space-y-2">
+                                        <label className="block text-sm font-medium">Product Image</label>
+                                        <div className="flex gap-4 border-b pb-2">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => setImageMode('url')}
+                                                className={`text-sm font-medium ${imageMode === 'url' ? 'text-primary border-b-2 border-primary rounded-none' : 'text-gray-500 rounded-none'}`}
+                                            >
+                                                Image Link
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => setImageMode('upload')}
+                                                className={`text-sm font-medium ${imageMode === 'upload' ? 'text-primary border-b-2 border-primary rounded-none' : 'text-gray-500 rounded-none'}`}
+                                            >
+                                                Upload File
+                                            </Button>
+                                        </div>
+
+                                        {imageMode === 'url' ? (
                                             <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleImageUpload}
-                                                className="w-full rounded-md border p-2 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                                                type="text"
+                                                placeholder="https://example.com/image.jpg"
+                                                value={(isAddingProduct ? newProduct.image : editingProduct?.image) || ''}
+                                                onChange={(e) => isAddingProduct
+                                                    ? setNewProduct({ ...newProduct, image: e.target.value })
+                                                    : setEditingProduct({ ...editingProduct!, image: e.target.value })
+                                                }
+                                                className="w-full rounded-md border p-2"
                                             />
-                                            {uploadingImage && <span className="text-sm text-gray-500">Uploading...</span>}
-                                        </div>
-                                    )}
-
-                                    {/* Image Preview */}
-                                    {(isAddingProduct ? newProduct.image : editingProduct?.image) && (
-                                        <div className="mt-2 h-32 w-32 overflow-hidden rounded-md border">
-                                            <img
-                                                src={isAddingProduct ? newProduct.image : editingProduct?.image}
-                                                alt="Preview"
-                                                className="h-full w-full object-cover"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Price 1 (Primary)</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        value={(isAddingProduct ? newProduct.price : editingProduct?.price) || ''}
-                                        onChange={(e) => isAddingProduct
-                                            ? setNewProduct({ ...newProduct, price: Number(e.target.value) })
-                                            : setEditingProduct({ ...editingProduct!, price: Number(e.target.value) })
-                                        }
-                                        className="w-full rounded-md border p-2"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Stock</label>
-                                    <input
-                                        type="number"
-                                        value={(isAddingProduct ? newProduct.stock : editingProduct?.stock) || ''}
-                                        onChange={(e) => isAddingProduct
-                                            ? setNewProduct({ ...newProduct, stock: Number(e.target.value) })
-                                            : setEditingProduct({ ...editingProduct!, stock: Number(e.target.value) })
-                                        }
-                                        className="w-full rounded-md border p-2"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Price 2 (Optional)</label>
-                                    <input
-                                        type="number"
-                                        value={(isAddingProduct ? newProduct.price_2 : editingProduct?.price_2) || ''}
-                                        onChange={(e) => isAddingProduct
-                                            ? setNewProduct({ ...newProduct, price_2: Number(e.target.value) })
-                                            : setEditingProduct({ ...editingProduct!, price_2: Number(e.target.value) })
-                                        }
-                                        className="w-full rounded-md border p-2"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Price 3 (Optional)</label>
-                                    <input
-                                        type="number"
-                                        value={(isAddingProduct ? newProduct.price_3 : editingProduct?.price_3) || ''}
-                                        onChange={(e) => isAddingProduct
-                                            ? setNewProduct({ ...newProduct, price_3: Number(e.target.value) })
-                                            : setEditingProduct({ ...editingProduct!, price_3: Number(e.target.value) })
-                                        }
-                                        className="w-full rounded-md border p-2"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Category</label>
-                                    <div className="flex gap-2">
-                                        {isAddingCategory ? (
-                                            <div className="flex flex-1 gap-2">
-                                                <input
-                                                    type="text"
-                                                    value={newCategory}
-                                                    onChange={(e) => setNewCategory(e.target.value)}
-                                                    placeholder="New Category Name"
-                                                    className="w-full rounded-md border p-2"
-                                                    autoFocus
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    onClick={handleAddCategory}
-                                                    className="bg-green-600 text-white hover:bg-green-700"
-                                                >
-                                                    Save
-                                                </Button>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => setIsAddingCategory(false)}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </div>
                                         ) : (
-                                            <div className="flex flex-1 gap-2">
-                                                <select
-                                                    value={isAddingProduct ? newProduct.category : editingProduct?.category}
-                                                    onChange={(e) => {
-                                                        const val = e.target.value;
-                                                        if (val === 'NEW') {
-                                                            setIsAddingCategory(true);
-                                                        } else {
-                                                            isAddingProduct
-                                                                ? setNewProduct({ ...newProduct, category: val })
-                                                                : setEditingProduct({ ...editingProduct!, category: val });
-                                                        }
-                                                    }}
-                                                    className="w-full rounded-md border p-2"
-                                                >
-                                                    <option value="">Select Category</option>
-                                                    {categories.map((cat) => (
-                                                        <option key={cat} value={cat}>{cat}</option>
-                                                    ))}
-                                                    <option value="NEW" className="font-semibold text-blue-600">+ Add New Category</option>
-                                                </select>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="icon"
-                                                    onClick={() => setIsAddingCategory(true)}
-                                                    className="shrink-0"
-                                                    title="Add New Category"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                </Button>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    className="w-full rounded-md border p-2 text-sm file:mr-4 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                                                />
+                                                {uploadingImage && <span className="text-sm text-gray-500">Uploading...</span>}
+                                            </div>
+                                        )}
+
+                                        {/* Image Preview */}
+                                        {(isAddingProduct ? newProduct.image : editingProduct?.image) && (
+                                            <div className="mt-2 h-32 w-32 overflow-hidden rounded-md border">
+                                                <img
+                                                    src={isAddingProduct ? newProduct.image : editingProduct?.image}
+                                                    alt="Preview"
+                                                    className="h-full w-full object-cover"
+                                                />
                                             </div>
                                         )}
                                     </div>
-                                </div>
 
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        id="popular"
-                                        checked={isAddingProduct ? newProduct.popular : editingProduct?.popular}
-                                        onChange={(e) => isAddingProduct
-                                            ? setNewProduct({ ...newProduct, popular: e.target.checked })
-                                            : setEditingProduct({ ...editingProduct!, popular: e.target.checked })
-                                        }
-                                        className="h-4 w-4 rounded border-gray-300"
-                                    />
-                                    <label htmlFor="popular" className="text-sm font-medium">Mark as Popular</label>
-                                </div>
+                                    <div>
+                                        <label className="mb-1 block text-sm font-medium">Price 1 (Primary)</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            value={(isAddingProduct ? newProduct.price : editingProduct?.price) || ''}
+                                            onChange={(e) => isAddingProduct
+                                                ? setNewProduct({ ...newProduct, price: Number(e.target.value) })
+                                                : setEditingProduct({ ...editingProduct!, price: Number(e.target.value) })
+                                            }
+                                            className="w-full rounded-md border p-2"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-sm font-medium">Stock</label>
+                                        <input
+                                            type="number"
+                                            value={(isAddingProduct ? newProduct.stock : editingProduct?.stock) || ''}
+                                            onChange={(e) => isAddingProduct
+                                                ? setNewProduct({ ...newProduct, stock: Number(e.target.value) })
+                                                : setEditingProduct({ ...editingProduct!, stock: Number(e.target.value) })
+                                            }
+                                            className="w-full rounded-md border p-2"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-1 block text-sm font-medium">Price 2 (Optional)</label>
+                                        <input
+                                            type="number"
+                                            value={(isAddingProduct ? newProduct.price_2 : editingProduct?.price_2) || ''}
+                                            onChange={(e) => isAddingProduct
+                                                ? setNewProduct({ ...newProduct, price_2: Number(e.target.value) })
+                                                : setEditingProduct({ ...editingProduct!, price_2: Number(e.target.value) })
+                                            }
+                                            className="w-full rounded-md border p-2"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-sm font-medium">Price 3 (Optional)</label>
+                                        <input
+                                            type="number"
+                                            value={(isAddingProduct ? newProduct.price_3 : editingProduct?.price_3) || ''}
+                                            onChange={(e) => isAddingProduct
+                                                ? setNewProduct({ ...newProduct, price_3: Number(e.target.value) })
+                                                : setEditingProduct({ ...editingProduct!, price_3: Number(e.target.value) })
+                                            }
+                                            className="w-full rounded-md border p-2"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-1 block text-sm font-medium">Category</label>
+                                        <div className="flex gap-2">
+                                            {isAddingCategory ? (
+                                                <div className="flex flex-1 gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={newCategory}
+                                                        onChange={(e) => setNewCategory(e.target.value)}
+                                                        placeholder="New Category Name"
+                                                        className="w-full rounded-md border p-2"
+                                                        autoFocus
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleAddCategory}
+                                                        className="bg-green-600 text-white hover:bg-green-700"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => setIsAddingCategory(false)}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-1 gap-2">
+                                                    <select
+                                                        value={isAddingProduct ? (newProduct.category_id || '') : (editingProduct?.category_id || '')}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val === 'NEW') {
+                                                                setIsAddingCategory(true);
+                                                            } else {
+                                                                isAddingProduct
+                                                                    ? setNewProduct({ ...newProduct, category_id: val })
+                                                                    : setEditingProduct({ ...editingProduct!, category_id: val });
+                                                            }
+                                                        }}
+                                                        className="w-full rounded-md border p-2"
+                                                    >
+                                                        <option value="">Select Category</option>
+                                                        {categories.map((cat) => (
+                                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                        ))}
+                                                        <option value="NEW" className="font-semibold text-blue-600">+ Add New Category</option>
+                                                    </select>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => setIsAddingCategory(true)}
+                                                        className="shrink-0"
+                                                        title="Add New Category"
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="popular"
+                                            checked={isAddingProduct ? newProduct.popular : editingProduct?.popular}
+                                            onChange={(e) => isAddingProduct
+                                                ? setNewProduct({ ...newProduct, popular: e.target.checked })
+                                                : setEditingProduct({ ...editingProduct!, popular: e.target.checked })
+                                            }
+                                            className="h-4 w-4 rounded border-gray-300"
+                                        />
+                                        <label htmlFor="popular" className="text-sm font-medium">Mark as Popular</label>
+                                    </div>
                                 </div>
                             </div>
                             <div className="border-t bg-gray-50 px-6 py-4">

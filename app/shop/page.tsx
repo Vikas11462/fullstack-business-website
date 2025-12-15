@@ -11,7 +11,10 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/auth-context"
 import { useRouter } from "next/navigation"
 
+import { Search } from "lucide-react"
+
 export default function ShopPage() {
+    const [searchQuery, setSearchQuery] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
     const [products, setProducts] = useState<any[]>([])
     const [categories, setCategories] = useState<{ id: string, name: string }[]>([])
@@ -47,7 +50,7 @@ export default function ShopPage() {
         try {
             const { data, error } = await supabase
                 .from('products')
-                .select('*')
+                .select('*, categories(name)')
                 .order('name')
 
             if (error) throw error
@@ -61,9 +64,22 @@ export default function ShopPage() {
 
     if (loading || loadingProducts) return <div className="p-8 text-center">Loading...</div>
 
-    const filteredProducts = selectedCategory
-        ? products.filter((p) => p.category === selectedCategory)
-        : products
+    const filteredProducts = products.filter((p) => {
+        // Filter by Category
+        const matchesCategory = selectedCategory ? p.category_id === selectedCategory : true;
+
+        // Filter by Search Query
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = p.name?.toLowerCase().includes(query) ||
+            p.description?.toLowerCase().includes(query) ||
+            false;
+
+        return matchesCategory && matchesSearch;
+    });
+
+    const selectedCategoryName = selectedCategory
+        ? categories.find(c => c.id === selectedCategory)?.name
+        : "All Products";
 
     return (
         <div className="flex min-h-screen flex-col">
@@ -85,9 +101,9 @@ export default function ShopPage() {
                                 {categories.map((category) => (
                                     <Button
                                         key={category.id}
-                                        variant={selectedCategory === category.name ? "default" : "ghost"}
+                                        variant={selectedCategory === category.id ? "default" : "ghost"}
                                         className="justify-start"
-                                        onClick={() => setSelectedCategory(category.name)}
+                                        onClick={() => setSelectedCategory(category.id)}
                                     >
                                         {category.name}
                                     </Button>
@@ -97,13 +113,27 @@ export default function ShopPage() {
 
                         {/* Product Grid */}
                         <div className="flex-1">
-                            <div className="mb-6">
-                                <h1 className="text-2xl font-bold">
-                                    {selectedCategory ? selectedCategory : "All Products"}
-                                </h1>
-                                <p className="text-muted-foreground">
-                                    Showing {filteredProducts.length} results
-                                </p>
+                            <div className="mb-6 space-y-4">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <h1 className="text-2xl font-bold">
+                                            {selectedCategoryName}
+                                        </h1>
+                                        <p className="text-muted-foreground">
+                                            Showing {filteredProducts.length} results
+                                        </p>
+                                    </div>
+                                    <div className="relative w-full sm:w-72">
+                                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search products..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

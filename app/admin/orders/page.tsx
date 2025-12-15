@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Package, CheckCircle, Clock, XCircle } from 'lucide-react';
-import { products } from '@/lib/data';
 
 type OrderItem = {
     id: string;
@@ -37,39 +36,84 @@ export default function AdminOrdersPage() {
 
     const fetchOrders = async () => {
         try {
-            // Fetch orders with items (cannot join products due to missing FK)
-            const { data, error } = await supabase
+            // 1. Fetch orders
+            const { data: dbOrders, error: ordersError } = await supabase
                 .from('orders')
-                .select(`
-                    *,
-                    items:order_items (
-                        id,
-                        quantity,
-                        price,
-                        product_id
-                    )
-                `)
+                .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (ordersError) throw ordersError;
 
-            // Map product details from local data
-            const ordersWithProducts = data?.map((order: any) => ({
-                ...order,
-                items: order.items?.map((item: any) => {
-                    const product = products.find(p => p.id === item.product_id);
+            // 2. Fetch Order Items manually (avoiding join issues)
+            const orderIds = dbOrders?.map((o: any) => o.id) || [];
+            const validOrderIds = orderIds.filter((id: string) =>
+                /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+            );
+
+            let orderItems: any[] = [];
+
+            if (validOrderIds.length > 0) {
+                const { data: itemsData, error: itemsError } = await supabase
+                    .from('order_items')
+                    .select('*')
+                    .in('order_id', validOrderIds);
+
+                if (itemsError) throw itemsError;
+                orderItems = itemsData || [];
+            }
+
+            // 3. Collect Product IDs from items
+            const productIds = new Set<string>();
+            orderItems.forEach((item: any) => {
+                if (item.product_id) productIds.add(item.product_id);
+            });
+
+            // 4. Fetch Products
+            const validProductIds = Array.from(productIds).filter(id =>
+                /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+            );
+
+            let productsMap: Record<string, any> = {};
+            if (validProductIds.length > 0) {
+                const { data: productsData, error: productsError } = await supabase
+                    .from('products')
+                    .select('id, name')
+                    .in('id', validProductIds);
+
+                if (productsError) throw productsError;
+
+                productsData?.forEach(p => {
+                    productsMap[p.id] = p;
+                });
+            }
+
+            // 5. Map everything together
+            const ordersWithDetails = dbOrders?.map((order: any) => {
+                // Find items for this order
+                const myItems = orderItems.filter((item: any) => item.order_id === order.id);
+
+                // Map product details to items
+                const myItemsWithProducts = myItems.map((item: any) => {
+                    const product = productsMap[item.product_id];
                     return {
                         ...item,
                         product: {
                             name: product?.name || 'Unknown Product'
                         }
                     };
-                })
-            }));
+                });
 
-            setOrders(ordersWithProducts || []);
+                return {
+                    ...order,
+                    items: myItemsWithProducts
+                };
+            });
+
+            setOrders(ordersWithDetails || []);
+
+
         } catch (err: any) {
-            console.error('Error fetching orders:', err);
+            console.error('Error fetching orders:', err, err.message);
             setError(err.message || 'Failed to load orders');
         } finally {
             setLoading(false);
