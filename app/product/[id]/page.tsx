@@ -137,44 +137,44 @@ export default function ProductPage() {
                         </div>
                     </div>
                 </div>
-        </div>
 
-                {/* Related Products Section */ }
-    {
-        relatedProducts.length > 0 && (
-            <div className="container mt-20 px-4 md:px-6">
-                <h2 className="mb-8 text-2xl font-bold">Related Products</h2>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {relatedProducts.map((related) => (
-                        <Link key={related.id} href={`/product/${related.id}`} className="group block">
-                            <div className="rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
-                                <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-gray-100">
-                                    {related.image && related.image !== '/placeholder.svg' ? (
-                                        <img
-                                            src={related.image}
-                                            alt={related.name}
-                                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                                        />
-                                    ) : (
-                                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                                            Img
+
+                {/* Related Products Section */}
+                {
+                    relatedProducts.length > 0 && (
+                        <div className="container mt-20 px-4 md:px-6">
+                            <h2 className="mb-8 text-2xl font-bold">Related Products</h2>
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                                {relatedProducts.map((related) => (
+                                    <Link key={related.id} href={`/product/${related.id}`} className="group block">
+                                        <div className="rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
+                                            <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-gray-100">
+                                                {related.image && related.image !== '/placeholder.svg' ? (
+                                                    <img
+                                                        src={related.image}
+                                                        alt={related.name}
+                                                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                                        Img
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="p-4">
+                                                <h3 className="line-clamp-1 font-semibold group-hover:underline">{related.name}</h3>
+                                                <p className="text-sm text-muted-foreground">{related.categories?.name}</p>
+                                                <div className="mt-2 font-bold">₹{related.price}</div>
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="line-clamp-1 font-semibold group-hover:underline">{related.name}</h3>
-                                    <p className="text-sm text-muted-foreground">{related.categories?.name}</p>
-                                    <div className="mt-2 font-bold">₹{related.price}</div>
-                                </div>
+                                    </Link>
+                                ))}
                             </div>
-                        </Link>
-                    ))}
-                </div>
-            </div>
-        )
-    }
+                        </div>
+                    )
+                }
             </main >
-        <Footer />
+            <Footer />
         </div >
     )
 }
