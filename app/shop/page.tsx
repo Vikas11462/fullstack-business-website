@@ -9,8 +9,7 @@ import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/auth-context"
-import { useRouter } from "next/navigation"
-
+import { useSearchParams, useRouter } from "next/navigation"
 import { Search } from "lucide-react"
 
 export default function ShopPage() {
@@ -21,12 +20,20 @@ export default function ShopPage() {
     const [loadingProducts, setLoadingProducts] = useState(true)
     const { profile, loading } = useAuth()
     const router = useRouter()
+    const searchParams = useSearchParams()
 
     useEffect(() => {
         if (!loading && profile?.role === 'admin') {
             router.push('/admin')
         }
     }, [profile, loading, router])
+
+    useEffect(() => {
+        const categoryId = searchParams.get('category_id')
+        if (categoryId) {
+            setSelectedCategory(categoryId)
+        }
+    }, [searchParams])
 
     useEffect(() => {
         fetchProducts()

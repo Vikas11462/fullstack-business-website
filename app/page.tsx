@@ -4,9 +4,9 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowRight, ShoppingBag, Star } from "lucide-react"
+import { ArrowRight, ShoppingBag, Star, Apple, Milk, Croissant, Cookie, CupSoda, Sparkles, Heart, Smartphone, Shirt, Home as HomeIcon } from "lucide-react"
 
-import { ProductCard } from "@/components/product/product-card"
+
 import { useAuth } from "@/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -16,8 +16,8 @@ import { motion } from "framer-motion"
 export default function Home() {
   const { profile, loading } = useAuth()
   const router = useRouter()
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
-  const [loadingProducts, setLoadingProducts] = useState(true)
+  const [categories, setCategories] = useState<any[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
 
   useEffect(() => {
     if (!loading && profile?.role === 'admin') {
@@ -26,24 +26,63 @@ export default function Home() {
   }, [profile, loading, router])
 
   useEffect(() => {
-    fetchFeaturedProducts()
+    fetchCategories()
   }, [])
 
-  const fetchFeaturedProducts = async () => {
+  const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('products')
-        .select('*, categories(name)')
-        .eq('popular', true)
-        .limit(4)
+        .from('categories')
+        .select('*')
+        .order('name')
 
       if (error) throw error
-      setFeaturedProducts(data || [])
+      setCategories(data || [])
     } catch (error) {
-      console.error('Error fetching featured products:', error)
+      console.error('Error fetching categories:', error)
     } finally {
-      setLoadingProducts(false)
+      setLoadingCategories(false)
     }
+  }
+
+  // Helper to get icon based on category name
+  const getCategoryIcon = (name: string) => {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('fruit') || lowerName.includes('veg')) return <Apple className="h-8 w-8 text-green-500" />;
+    if (lowerName.includes('milk') || lowerName.includes('dairy')) return <Milk className="h-8 w-8 text-blue-500" />;
+    if (lowerName.includes('bread') || lowerName.includes('bakery')) return <Croissant className="h-8 w-8 text-amber-600" />;
+    if (lowerName.includes('snack') || lowerName.includes('chip')) return <Cookie className="h-8 w-8 text-orange-500" />;
+    if (lowerName.includes('drink') || lowerName.includes('juice') || lowerName.includes('beverage')) return <CupSoda className="h-8 w-8 text-purple-500" />;
+    if (lowerName.includes('clean') || lowerName.includes('wash') || lowerName.includes('soap')) return <Sparkles className="h-8 w-8 text-cyan-500" />;
+    if (lowerName.includes('personal') || lowerName.includes('care')) return <Heart className="h-8 w-8 text-rose-500" />;
+    if (lowerName.includes('electronic') || lowerName.includes('phone')) return <Smartphone className="h-8 w-8 text-slate-500" />;
+    if (lowerName.includes('fashion') || lowerName.includes('cloth')) return <Shirt className="h-8 w-8 text-indigo-500" />;
+    if (lowerName.includes('home') || lowerName.includes('decor')) return <HomeIcon className="h-8 w-8 text-teal-500" />;
+
+    return <ShoppingBag className="h-8 w-8 text-primary" />;
+  }
+
+  const getCategoryColor = (index: number) => {
+    const colors = [
+      'bg-red-50 hover:bg-red-100 border-red-100',
+      'bg-orange-50 hover:bg-orange-100 border-orange-100',
+      'bg-amber-50 hover:bg-amber-100 border-amber-100',
+      'bg-yellow-50 hover:bg-yellow-100 border-yellow-100',
+      'bg-lime-50 hover:bg-lime-100 border-lime-100',
+      'bg-green-50 hover:bg-green-100 border-green-100',
+      'bg-emerald-50 hover:bg-emerald-100 border-emerald-100',
+      'bg-teal-50 hover:bg-teal-100 border-teal-100',
+      'bg-cyan-50 hover:bg-cyan-100 border-cyan-100',
+      'bg-sky-50 hover:bg-sky-100 border-sky-100',
+      'bg-blue-50 hover:bg-blue-100 border-blue-100',
+      'bg-indigo-50 hover:bg-indigo-100 border-indigo-100',
+      'bg-violet-50 hover:bg-violet-100 border-violet-100',
+      'bg-purple-50 hover:bg-purple-100 border-purple-100',
+      'bg-fuchsia-50 hover:bg-fuchsia-100 border-fuchsia-100',
+      'bg-pink-50 hover:bg-pink-100 border-pink-100',
+      'bg-rose-50 hover:bg-rose-100 border-rose-100',
+    ];
+    return colors[index % colors.length];
   }
 
   if (loading) return null
@@ -97,43 +136,45 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Products Section */}
-        <section className="py-16 md:py-24 lg:py-32">
+        {/* Shop by Category Section */}
+        <section className="py-16 md:py-24">
           <div className="container px-4 md:px-6">
-            <div className="flex items-end justify-between mb-12">
+            <div className="flex items-end justify-between mb-8">
               <div className="space-y-1">
-                <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Trending Now</h2>
-                <p className="text-muted-foreground">Curated selection of our most popular items</p>
+                <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Shop by Category</h2>
+                <p className="text-muted-foreground">Find what you're looking for</p>
               </div>
               <Link href="/shop" className="group hidden md:inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-                View All Products
+                View All Categories
                 <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {loadingProducts ? (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+              {loadingCategories ? (
                 // Skeleton loading state
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="space-y-4">
-                    <div className="aspect-square rounded-xl bg-muted animate-pulse" />
-                    <div className="space-y-2">
-                      <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
-                      <div className="h-4 w-1/3 rounded bg-muted animate-pulse" />
-                    </div>
-                  </div>
+                Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="aspect-square rounded-xl bg-muted animate-pulse" />
                 ))
               ) : (
-                featuredProducts.map((product, index) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
+                categories.map((category, index) => (
+                  <Link key={category.id} href={`/shop?category_id=${category.id}`}>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      whileHover={{ y: -5, scale: 1.02 }}
+                      className={`flex flex-col items-center justify-center p-4 h-full aspect-square rounded-2xl border transition-all cursor-pointer shadow-sm ${getCategoryColor(index)}`}
+                    >
+                      <div className="mb-3 p-3 bg-white rounded-full shadow-sm">
+                        {getCategoryIcon(category.name)}
+                      </div>
+                      <span className="font-semibold text-center text-sm md:text-base line-clamp-2">
+                        {category.name}
+                      </span>
+                    </motion.div>
+                  </Link>
                 ))
               )}
             </div>
