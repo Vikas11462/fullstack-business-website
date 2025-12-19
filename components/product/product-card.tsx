@@ -18,59 +18,83 @@ export function ProductCard({ product, className }: ProductCardProps) {
     const quantity = cartItem ? cartItem.quantity : 0
 
     return (
-        <div className={cn("group relative overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-lg hover:-translate-y-1", className)}>
-            <Link href={`/product/${product.id}`}>
-                <div className="aspect-square bg-muted relative overflow-hidden">
+        <div className={cn("group relative flex flex-col overflow-hidden rounded-3xl border border-transparent bg-white text-foreground shadow-sm transition-all duration-300 hover:shadow-xl hover:border-primary/10 hover:-translate-y-1", className)}>
+            <Link href={`/product/${product.id}`} className="block w-full">
+                <div className="aspect-[1/0.9] bg-[#f8f9fa] relative overflow-hidden flex items-center justify-center p-4">
                     {product.image && product.image !== '/placeholder.svg' ? (
                         <img
                             src={product.image}
                             alt={product.name}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110 mix-blend-multiply"
                         />
                     ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-secondary/50">
-                            Image
+                        <div className="flex h-full w-full items-center justify-center text-muted-foreground opacity-20">
+                            <ShoppingCart className="h-12 w-12" />
                         </div>
                     )}
-                    {/* Overlay gradient on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    {/* Badge for "New" or Discount (Optional placeholder) */}
+                    {/* <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+                        SALE
+                     </div> */}
                 </div>
             </Link>
-            <div className="p-4 space-y-3">
-                <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        {product.categories?.name || product.category || 'Uncategorized'}
+
+            <div className="flex flex-1 flex-col justify-between p-5">
+                <div className="space-y-1.5 mb-3">
+                    <p className="text-xs font-semibold text-primary/80 uppercase tracking-wider">
+                        {product.categories?.name || product.category || 'Fresh'}
                     </p>
                     <Link href={`/product/${product.id}`}>
-                        <h3 className="font-semibold leading-tight hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+                        <h3 className="font-bold text-lg leading-tight hover:text-primary transition-colors line-clamp-2" title={product.name}>
+                            {product.name}
+                        </h3>
                     </Link>
+                    <p className="text-xs text-muted-foreground line-clamp-1">
+                        Premium Quality
+                    </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
-                    <span className="text-lg font-bold text-primary">₹{product.price}</span>
+                <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/40">
+                    <div className="flex flex-col">
+                        <span className="text-sm text-muted-foreground line-through opacity-0 hidden">₹{Number(product.price) + 20}</span>
+                        <span className="text-xl font-extrabold text-foreground">₹{product.price}</span>
+                    </div>
 
                     {quantity === 0 ? (
-                        <Button size="sm" onClick={() => addItem(product)} className="rounded-full h-8 px-4 transition-transform active:scale-95">
-                            Add <ShoppingCart className="ml-2 h-3.5 w-3.5" />
+                        <Button
+                            size="sm"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                addItem(product)
+                            }}
+                            className="rounded-full h-10 px-5 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all font-semibold"
+                        >
+                            Add
                         </Button>
                     ) : (
-                        <div className="flex items-center gap-1 bg-secondary/50 rounded-full p-0.5 border border-border/50">
+                        <div className="flex items-center gap-2 bg-secondary rounded-full p-1 border border-primary/10 shadow-inner">
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-7 w-7 rounded-full hover:bg-background"
-                                onClick={() => updateQuantity(product.id, quantity - 1)}
+                                className="h-8 w-8 rounded-full bg-white shadow-sm hover:scale-110 transition-transform text-primary"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    updateQuantity(product.id, quantity - 1)
+                                }}
                             >
-                                <Minus className="h-3 w-3" />
+                                <Minus className="h-4 w-4" />
                             </Button>
-                            <span className="text-sm font-medium w-6 text-center tabular-nums">{quantity}</span>
+                            <span className="text-sm font-bold w-4 text-center tabular-nums">{quantity}</span>
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-7 w-7 rounded-full hover:bg-background"
-                                onClick={() => addItem(product)}
+                                className="h-8 w-8 rounded-full bg-primary text-primary-foreground shadow-sm hover:scale-110 transition-transform"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    addItem(product)
+                                }}
                             >
-                                <Plus className="h-3 w-3" />
+                                <Plus className="h-4 w-4" />
                             </Button>
                         </div>
                     )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Pencil, Trash2, Plus, X, Upload, FileJson } from 'lucide-react';
+import { Pencil, Trash2, Plus, X, Upload, FileJson, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { products as initialProducts } from '@/lib/data';
 
@@ -28,6 +28,7 @@ export default function AdminProductsPage() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isAddingProduct, setIsAddingProduct] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Form state for new product
     const [newProduct, setNewProduct] = useState<Partial<Product>>({
@@ -331,24 +332,36 @@ export default function AdminProductsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <h1 className="text-2xl font-bold">Products Management</h1>
-                <div className="flex gap-2">
-                    {products.length === 0 && (
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:w-64"
+                        />
+                    </div>
+                    <div className="flex gap-2">
+                        {products.length === 0 && (
+                            <Button
+                                onClick={handleSeedProducts}
+                                variant="outline"
+                                className="flex items-center gap-2 text-primary"
+                            >
+                                <Upload className="h-4 w-4" /> Upload Default Data
+                            </Button>
+                        )}
                         <Button
-                            onClick={handleSeedProducts}
-                            variant="outline"
-                            className="flex items-center gap-2 text-primary"
+                            onClick={() => setIsAddingProduct(true)}
+                            className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
                         >
-                            <Upload className="h-4 w-4" /> Upload Default Data
+                            <Plus className="h-4 w-4" /> Add Product
                         </Button>
-                    )}
-                    <Button
-                        onClick={() => setIsAddingProduct(true)}
-                        className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                        <Plus className="h-4 w-4" /> Add Product
-                    </Button>
+                    </div>
                 </div>
             </div>
 
@@ -366,34 +379,39 @@ export default function AdminProductsPage() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {products.map((product) => (
-                            <tr key={product.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-3 font-medium">{product.name}</td>
-                                <td className="px-6 py-3">₹{product.price}</td>
-                                <td className="px-6 py-3">{product.price_2 ? `₹${product.price_2}` : '-'}</td>
-                                <td className="px-6 py-3">{product.price_3 ? `₹${product.price_3}` : '-'}</td>
-                                <td className="px-6 py-3">{product.stock}</td>
-                                <td className="px-6 py-3">{product.categories?.name || 'Uncategorized'}</td>
-                                <td className="flex gap-2 px-6 py-3">
-                                    <Button
-                                        onClick={() => setEditingProduct(product)}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-blue-600 hover:bg-blue-50"
-                                    >
-                                        <Pencil className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleDelete(product.id)}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-red-600 hover:bg-red-50"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
+                        {products
+                            .filter(product =>
+                                product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                            .map((product) => (
+                                <tr key={product.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-3 font-medium">{product.name}</td>
+                                    <td className="px-6 py-3">₹{product.price}</td>
+                                    <td className="px-6 py-3">{product.price_2 ? `₹${product.price_2}` : '-'}</td>
+                                    <td className="px-6 py-3">{product.price_3 ? `₹${product.price_3}` : '-'}</td>
+                                    <td className="px-6 py-3">{product.stock}</td>
+                                    <td className="px-6 py-3">{product.categories?.name || 'Uncategorized'}</td>
+                                    <td className="flex gap-2 px-6 py-3">
+                                        <Button
+                                            onClick={() => setEditingProduct(product)}
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-blue-600 hover:bg-blue-50"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleDelete(product.id)}
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-red-600 hover:bg-red-50"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
                     </tbody>
                 </table>
                 {products.length === 0 && (

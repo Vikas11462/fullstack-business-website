@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ export default function RootLayout({
             {children}
           </CartProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );

@@ -11,25 +11,30 @@ export function Header() {
     const { user, signOut, profile } = useAuth()
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        <header className="sticky top-0 z-50 w-full border-t-4 border-primary border-b border-border/40 bg-white/80 backdrop-blur-xl shadow-sm supports-[backdrop-filter]:bg-white/60 dark:bg-black/50 dark:border-white/10">
+            <div className="container flex h-16 md:h-20 items-center justify-between px-4 md:px-6 transition-all">
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" className="md:hidden">
                         <Menu className="h-5 w-5" />
                         <span className="sr-only">Toggle menu</span>
                     </Button>
                     <Link href={profile?.role === 'admin' ? "/admin" : "/"} className="flex items-center gap-2 group">
+                        <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shadow-lg shadow-primary/30 group-hover:scale-105 transition-transform">
+                            G
+                        </div>
                         <span className="text-xl font-bold tracking-tight text-primary group-hover:text-primary/80 transition-colors">Gupta Ji</span>
                     </Link>
                 </div>
 
                 <div className="hidden flex-1 items-center justify-center px-6 md:flex">
-                    <div className="relative w-full max-w-md group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <div className="relative w-full max-w-lg group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <input
                             type="search"
-                            placeholder="Search products..."
-                            className="h-10 w-full rounded-full border border-input bg-secondary/50 px-10 py-2 text-sm shadow-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-background disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="What are you looking for today?"
+                            className="h-12 w-full rounded-2xl border-2 border-transparent bg-secondary/50 px-12 py-2 text-sm shadow-inner transition-all 
+                                     placeholder:text-muted-foreground/70
+                                     focus-visible:outline-none focus-visible:border-primary/20 focus-visible:bg-background focus-visible:shadow-lg focus-visible:shadow-primary/5"
                         />
                     </div>
                 </div>
@@ -40,10 +45,10 @@ export function Header() {
                         <span className="sr-only">Search</span>
                     </Button>
                     <Link href="/cart">
-                        <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 hover:text-primary">
-                            <ShoppingCart className="h-5 w-5" />
+                        <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 hover:text-primary transition-colors">
+                            <ShoppingCart className="h-6 w-6" />
                             {totalItems > 0 && (
-                                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground animate-in zoom-in">
+                                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground animate-in zoom-in ring-2 ring-background">
                                     {totalItems}
                                 </span>
                             )}
@@ -52,14 +57,14 @@ export function Header() {
                     </Link>
                     {user ? (
                         <Link href="/profile">
-                            <Button variant="ghost" size="icon" title="My Profile" className="hover:bg-primary/10 hover:text-primary">
-                                <User className="h-5 w-5" />
+                            <Button variant="ghost" size="icon" title="My Profile" className="hover:bg-primary/10 hover:text-primary transition-colors">
+                                <User className="h-6 w-6" />
                                 <span className="sr-only">My Profile</span>
                             </Button>
                         </Link>
                     ) : (
                         <Link href="/login">
-                            <Button variant="default" size="sm" className="rounded-full px-6">
+                            <Button variant="default" size="default" className="rounded-full px-6 font-semibold shadow-md hover:shadow-lg shadow-primary/20 transition-all">
                                 Login
                             </Button>
                         </Link>
