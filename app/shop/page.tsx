@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer"
 import { ProductCard } from "@/components/product/product-card"
 // import { categories } from "@/lib/data" // Deprecated
 import { supabase } from "@/lib/supabase"
+import { dummyProducts, dummyCategories } from "@/lib/dummy-data"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/auth-context"
@@ -48,12 +49,8 @@ function ShopContent() {
 
     const fetchCategories = async () => {
         try {
-            const { data } = await supabase.from('categories').select('*').order('name')
-            if (data && data.length > 0) {
-                setCategories(data)
-            } else {
-                setCategories([])
-            }
+            // Using dummy data as fallback/default
+            setCategories(dummyCategories)
         } catch (e) {
             console.error('Error fetching categories', e)
         }
@@ -61,13 +58,8 @@ function ShopContent() {
 
     const fetchProducts = async () => {
         try {
-            const { data, error } = await supabase
-                .from('products')
-                .select('*, categories(name)')
-                .order('name')
-
-            if (error) throw error
-            setProducts(data || [])
+            // Using dummy data as fallback/default
+            setProducts(dummyProducts)
         } catch (error) {
             console.error('Error fetching products:', error)
         } finally {
