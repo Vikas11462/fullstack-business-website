@@ -1,3 +1,31 @@
+# Fullstack Business Website
+
+A full-stack responsive business website built with **[React, Node.js, Express, MongoDB]** (replace with your stack). This project demonstrates modern web development practices including REST APIs, frontend responsiveness, and deployment readiness.
+
+## Demo
+If deployed, add your live link here.
+
+## Features
+- Responsive UI compatible with desktop and mobile screens
+- Navigation and service showcase
+- Contact form with API backend
+- [Add any other features you implemented]
+
+## Tech Stack
+- Frontend: **[React / HTML / CSS / Tailwind / Bootstrap]**
+- Backend: **[Node.js / Express]**
+- Database: **[MongoDB / other]**
+- Deployment: **[Vercel / Netlify / Render / Railway]** (if deployed)
+
+## Installation
+1. Clone the repository  
+   ```bash
+   git clone https://github.com/Vikas11462/fullstack-business-website.git
+
+
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
