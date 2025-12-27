@@ -13,7 +13,7 @@ export default function TermsPage() {
                         <section className="space-y-2">
                             <h2 className="text-xl font-semibold text-foreground">1. Introduction</h2>
                             <p>
-                                Welcome to Gupta Ji Store. By accessing our website and placing an order, you agree to be bound by these terms and conditions.
+                                Welcome to E-commerce Store. By accessing our website and placing an order, you agree to be bound by these terms and conditions.
                                 Please read them carefully before making a purchase.
                             </p>
                         </section>
@@ -45,7 +45,7 @@ export default function TermsPage() {
                         <section className="space-y-2">
                             <h2 className="text-xl font-semibold text-foreground">5. Contact Information</h2>
                             <p>
-                                Questions about the Terms of Service should be sent to us at support@guptaji.com.
+                                Questions about the Terms of Service should be sent to us at support@ecommerce.com.
                             </p>
                         </section>
                     </div>

@@ -74,9 +74,9 @@ export function Header() {
                     </Button>
                     <Link href={profile?.role === 'admin' ? "/admin" : "/"} className="flex items-center gap-2 group">
                         <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shadow-lg shadow-primary/30 group-hover:scale-105 transition-transform">
-                            G
+                            E
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-primary group-hover:text-primary/80 transition-colors">Gupta Ji</span>
+                        <span className="text-xl font-bold tracking-tight text-primary group-hover:text-primary/80 transition-colors">E-commerce</span>
                     </Link>
                 </div>
 

@@ -19,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div className="container mx-auto flex h-16 items-center justify-between px-4">
                         <div className="flex items-center gap-6">
                             <Link href="/admin" className="text-xl font-bold">
-                                Gupta Ji Admin
+                                E-commerce Admin
                             </Link>
                             <nav className="flex gap-2 text-sm font-medium">
                                 <Link href="/admin" className={isActive('/admin')}>

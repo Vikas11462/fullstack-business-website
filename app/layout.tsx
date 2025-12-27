@@ -11,8 +11,8 @@ import SmoothScroll from "@/components/smooth-scroll";
 const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Gupta Ji Store",
-  description: "Order online from Gupta Ji Store",
+  title: "E-commerce Store",
+  description: "Order online from E-commerce Store",
 };
 
 export default function RootLayout({
