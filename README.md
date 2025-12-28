@@ -33,3 +33,56 @@ Deployment:
 
 ## 📂 Project Structure
 
+/src or /app
+/components
+/pages
+/public
+/backend or /api
+
+## 🛠️ Environment Variables
+
+Create a `.env` file based on `.env.example`.
+
+Example:
+
+DATABASE_URL=
+JWT_SECRET=
+SUPABASE_URL=
+SUPABASE_API_KEY=
+
+graphql
+Copy code
+
+## ▶️ How to Run Locally
+
+git clone https://github.com/vikas11462/fullstack-business-website
+cd fullstack-business-website
+npm install
+npm run dev
+
+Then open browser at:
+
+http://localhost:3000
+
+## 🔗 Live Demo
+
+Add your deployment link here after hosting:
+https://fullstack-business-website.vercel.app
+
+## 📸 Screenshots
+
+Add screenshots inside `/public/screenshots` and insert here.
+
+## 🤝 Contributions
+
+Pull requests are welcome. For major changes, open an issue first.
+
+## 📜 License
+
+This project is licensed under the MIT License. See `LICENSE` file for details.
+
+## 👤 Author
+
+Vikas
+
+If you like this project, ⭐ star the repo — it motivates further development.
