@@ -1,88 +1,127 @@
 # Full-Stack Business Website
 
-A fully responsive full-stack business website that showcases services, client testimonials, contact form, and admin dashboard for managing inquiries and content.
+A modern, responsive full-stack business website built with **Next.js** and **TypeScript**, featuring a contact form, admin functionality, and database integration via Supabase.
 
-This project is designed as a real-world business website suitable for freelancers, agencies, or small companies.
+---
 
-## 🚀 Tech Stack
+## 🚀 Live Demo
 
-Frontend:
-- HTML, CSS, JavaScript
-- React / Next.js (update if different)
-- Tailwind CSS / Bootstrap (update if different)
+[https://fullstack-business-website.vercel.app](https://fullstack-business-website.vercel.app)
 
-Backend:
-- Node.js
-- Express.js / Next API Routes (update if different)
+---
 
-Database:
-- MongoDB / Supabase / PostgreSQL (update if different)
+## 🧠 Tech Stack
 
-Deployment:
-- Vercel / Netlify / Render (update if deployed)
+* **Framework:** Next.js (App Router)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS
+* **Backend:** Next.js API Routes
+* **Database & Auth:** Supabase (PostgreSQL)
+* **Deployment:** Vercel
+
+---
 
 ## ✨ Features
 
-- Fully responsive UI for mobile and desktop
-- Services listing and pricing section
-- Contact form with backend API
-- Stores form submissions in database
-- Admin panel to view customer messages
-- SEO-friendly structure
-- Clean and maintainable folder architecture
+* 📱 Fully responsive business website
+* 📩 Contact form with backend integration
+* 🔐 Admin access for managing inquiries
+* ⚡ Server-side rendering & SEO-friendly
+* 🗄 PostgreSQL database (via Supabase)
 
-## 📂 Project Structure
+---
 
-/src or /app
-/components
-/pages
-/public
-/backend or /api
+## 📁 Project Structure
 
-## 🛠️ Environment Variables
+```
+app/            → Next.js App Router pages
+components/     → Reusable UI components
+context/        → Global state/context providers
+lib/            → Utility & helper functions
+public/         → Static assets
+scripts/        → SQL / setup scripts
+supabase/       → Supabase configuration
+```
 
-Create a `.env` file based on `.env.example`.
+---
 
-Example:
+## 🏗 Architecture Overview
 
-DATABASE_URL=
-JWT_SECRET=
-SUPABASE_URL=
-SUPABASE_API_KEY=
+```
+Client (Next.js UI)
+        ↓
+API Routes (Next.js)
+        ↓
+Supabase (Auth + PostgreSQL)
+```
 
-graphql
-Copy code
+---
 
-## ▶️ How to Run Locally
+## 🛠 Getting Started (Local Setup)
 
-git clone https://github.com/vikas11462/fullstack-business-website
+### Prerequisites
+
+* Node.js **18+**
+* npm or yarn
+* Supabase account
+
+### Installation
+
+```
+git clone https://github.com/Vikas11462/fullstack-business-website.git
 cd fullstack-business-website
 npm install
+```
+
+### Environment Variables
+
+Create a `.env.local` file using the template below:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
+```
+
+⚠️ Never commit your `.env.local` file.
+
+### Run Locally
+
+```
 npm run dev
+```
 
-Then open browser at:
+Visit `http://localhost:3000`
 
-http://localhost:3000
+---
 
-## 🔗 Live Demo
+## 🌱 Branching Strategy
 
-Add your deployment link here after hosting:
-https://fullstack-business-website.vercel.app
+```
+main        → production-ready code
+dev         → active development
+feature/*   → new features or improvements
+```
 
-## 📸 Screenshots
+---
 
-Add screenshots inside `/public/screenshots` and insert here.
+## 🤝 Contributing
 
-## 🤝 Contributions
+Contributions are welcome! Please follow these steps:
 
-Pull requests are welcome. For major changes, open an issue first.
+1. Fork the repository
+2. Create a new branch (`feature/your-feature-name`)
+3. Make your changes following the project structure
+4. Commit with clear messages
+5. Open a pull request against the `dev` branch
+
+---
 
 ## 📜 License
 
-This project is licensed under the MIT License. See `LICENSE` file for details.
+This project is licensed under the **MIT License**.
 
-## 👤 Author
+---
 
-Vikas
-
-If you like this project, ⭐ star the repo — it motivates further development.
+⭐ If you find this project useful, please consider giving it a star!
