@@ -38,7 +38,7 @@ export default function ContactPage() {
                                 <div>
                                     <h3 className="font-semibold text-lg mb-1">Email Us</h3>
                                     <p className="text-muted-foreground text-sm mb-2">Our friendly team is here to help.</p>
-                                    <a href="mailto:support@guptaji.com" className="text-primary font-medium hover:underline">support@guptaji.com</a>
+                                    <a href="mailto:support@e-commercestore.com" className="text-primary font-medium hover:underline">support@e-commercestore.com</a>
                                 </div>
                             </motion.div>
 

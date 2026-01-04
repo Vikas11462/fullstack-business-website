@@ -28,13 +28,13 @@ export default function AboutPage() {
                             >
                                 <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-6 py-2 text-sm font-bold text-primary backdrop-blur-md shadow-lg mb-4">
                                     <Star className="mr-2 h-4 w-4 fill-primary" />
-                                    The Gupta Jii Promise
+                                    The Heritage Promise
                                 </div>
                                 <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
                                     We Bridge the Gap Between <span className="text-primary text-glow">Innovation</span> & You.
                                 </h1>
                                 <p className="text-xl text-muted-foreground md:text-2xl max-w-2xl mx-auto font-medium pt-4">
-                                    Gupta Jii Store isn't just a marketplace; it's a curated experience designed to elevate your lifestyle through premium technology.
+                                    Our Store isn't just a marketplace; it's a curated experience designed to elevate your lifestyle through premium technology.
                                 </p>
                             </motion.div>
                         </div>
@@ -85,7 +85,7 @@ export default function AboutPage() {
                                         What began as a localized vision to provide authentic, high-quality electronics has blossomed into a nationwide sanctuary for tech enthusiasts. We understood early on that in a world of clones, <span className="text-foreground border-b-2 border-primary/30">authenticity is the ultimate luxury</span>.
                                     </p>
                                     <p>
-                                        At Gupta Jii Store, we don't just sell gadgets. We curate tools that help you work smarter, live better, and stay ahead of the curve. Every product in our catalog undergoes rigorous quality checks to ensure it deserves a place in your life.
+                                        At Our Store, we don't just sell gadgets. We curate tools that help you work smarter, live better, and stay ahead of the curve. Every product in our catalog undergoes rigorous quality checks to ensure it deserves a place in your life.
                                     </p>
                                 </div>
 
@@ -135,7 +135,7 @@ export default function AboutPage() {
                                 {
                                     icon: <Users className="h-12 w-12 text-indigo-500" />,
                                     title: "Elite Community",
-                                    description: "Join thousands of satisfied customers who have made Gupta Jii Store their primary tech partner."
+                                    description: "Join thousands of satisfied customers who have made us their primary tech partner."
                                 }
                             ].map((feature, index) => (
                                 <motion.div
